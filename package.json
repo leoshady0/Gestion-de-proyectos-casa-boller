@@ -1,0 +1,15 @@
+{
+  "name": "forja-development",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FORJA - desarrollo local y sincronizacion Git entre equipos",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "check": "node scripts/check.mjs",
+    "sync:status": "node scripts/sync.mjs status",
+    "sync:pull": "node scripts/sync.mjs pull",
+    "sync:push": "node scripts/sync.mjs push"
+  }
+}
+
