@@ -1,0 +1,9 @@
+const fs=require('fs'),assert=require('assert');const root='../dist/';const {projectCanClose,projectClosePDF}=require(root+'project-close-report.js');
+assert(!projectCanClose([]));assert(!projectCanClose([{status:'doing'}]));assert(!projectCanClose([{status:'done'},{status:'todo'}]));assert(projectCanClose([{status:'done'}]));
+assert.throws(()=>projectClosePDF({name:'Prueba'},[]));
+const project={id:'test',name:'Proyecto de prueba - Instalación eléctrica',description:'Datos ficticios para verificar el informe. '+('Descripción extensa con acentos y caracteres (especiales). '.repeat(8)),date:'2026-11-20',schedule:{start:'2026-11-01',calendarDays:20,rows:[{name:'Instalación',activeDays:[1,2,3]}],incidents:[{date:'2026-11-02',type:'rain',text:'Lluvia de prueba',author:'Responsable de prueba'}]},scheduleVersions:[],costs:{currency:'PYG',quotes:[{id:'q',concept:'Materiales',amount:100000,approved:true,category:'Base'}],expenses:[{id:'e',concept:'Materiales',amount:110000,status:'Pendiente',category:'Base',supplier:'Proveedor ficticio'}],suppliers:[],conclusion:'Verificar pago pendiente.'}};
+const tasks=Array.from({length:24},(_,i)=>({id:'t'+i,status:'done',name:'Tarea de prueba '+i,owner:'Responsable ficticio',description:'Prueba de descripción. '+('X'.repeat(i===0?190:0))}));
+const bytes=projectClosePDF(project,tasks,[{title:'Acta de prueba',fileName:'acta.pdf',category:'Acta',documentDate:'2026-11-10'}],[{taskId:'t0',name:'evidencia.png'},{costProjectId:'test',name:'factura.pdf',costType:'expense'}],new Date('2026-11-10T12:00:00Z'));
+const text=Buffer.from(bytes).toString('ascii');assert(text.includes('evidencia.png'));assert(text.includes('factura.pdf'));assert(text.includes('ATENCION'));assert(text.includes('Acta de prueba'));
+const xref=Number(text.match(/startxref\n(\d+)/)[1]);assert.equal(text.slice(xref,xref+4),'xref');
+console.log('Elegibilidad, metadatos, pagos pendientes y estructura PDF: OK');

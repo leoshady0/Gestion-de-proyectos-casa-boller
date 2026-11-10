@@ -1,4 +1,21 @@
 .mobile-nav,.mobile-heading,.mobile-back,.mobile-task-state{display:none}
+.mobile-task-groups{display:none}
+@media(max-width:780px){
+ body[data-mobile-view="tasks"] #board{display:none}
+ body[data-mobile-view="tasks"] .mobile-task-groups{display:grid;gap:22px}
+ .mobile-project-tasks{background:#E9EFFA;border:1px solid #D8E2F2;border-radius:18px;padding:14px;min-width:0}
+ .mobile-project-tasks-heading{padding:3px 2px 14px;border-bottom:1px solid #CBD8EF;margin-bottom:14px}
+ .mobile-project-tasks-heading h3{font-size:18px;line-height:1.35;margin:0;color:#183DAD;overflow-wrap:anywhere}
+ .mobile-project-tasks-heading p{font-size:11px;margin:6px 0 0;color:#506384}
+ .mobile-project-task[data-mobile-status="todo"]{--task-color:#C42B31;--task-bg:#FFF0F1;--task-ink:#A01C28}
+ .mobile-project-task[data-mobile-status="doing"]{--task-color:#C85B00;--task-bg:#FFF3DF;--task-ink:#974000}
+ .mobile-project-task[data-mobile-status="done"]{--task-color:#078246;--task-bg:#E6F8ED;--task-ink:#056535}
+ .mobile-project-tasks .mobile-project-task{border-left:4px solid var(--task-color)}
+ .mobile-project-tasks .taskmeta{flex-wrap:wrap;align-items:flex-start;gap:8px}
+ .mobile-project-tasks .taskproject{max-width:100%;font-size:11px;white-space:normal;overflow-wrap:anywhere;color:#334D7C;font-weight:600;text-align:right;flex:1;min-width:100px}
+ .mobile-task-status{display:inline-block;color:var(--task-ink);background:var(--task-bg);font-size:10px;font-weight:700;padding:5px 8px;border-radius:6px;margin-top:10px}
+ .mobile-project-more{width:100%;min-height:46px;border:1px solid #9FB4E4;background:white;color:#183DAD;font-size:13px;font-weight:700;border-radius:12px;margin-top:2px}
+}
 @media(max-width:780px){
  :root{--mobile-blue:#183DAD}
  body{background:#F4F6FC;font-size:14px;-webkit-tap-highlight-color:transparent}

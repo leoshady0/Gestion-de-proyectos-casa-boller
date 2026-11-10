@@ -1,83 +1,34 @@
-# FORJA - desarrollo en dos computadoras
+# Gestión de proyectos - frontend
 
-Este repositorio sincroniza **codigo**, no datos de proyectos ni documentos del navegador. La interfaz y funciones de FORJA se mantienen. No configura ni ejecuta despliegues del sitio publicado.
+Interfaces de ordenador y smartphone, con navegación móvil, tareas agrupadas por proyecto (máximo tres en el resumen), indicadores de avance e informes PDF. Este repositorio contiene únicamente el frontend y sus herramientas y pruebas.
 
-## Requisitos
+## Aplicación local original
 
-- Git y Node.js 22 o superior instalados desde sus fuentes oficiales. npm es opcional.
-- Acceso a un repositorio privado aprobado en GitHub o Azure DevOps.
-- Navegador moderno. Las tipografias usan Google Fonts; hay fuentes alternativas si no hay conexion.
-
-No hay dependencias npm que instalar. `npm install` no es necesario.
-
-## Notebook: clonar y ejecutar
-
-Despues de crear y aprobar el repositorio, sustituir URL_PRIVADA por su URL HTTPS, sin tokens:
-
-```powershell
-git clone URL_PRIVADA forja
-cd forja
-node scripts/check.mjs
-node scripts/serve.mjs
-```
-
-Abrir `http://127.0.0.1:8090`. Detener con Ctrl+C. Abrir esta carpeta en Codex para continuar desarrollando. Si Node no esta en PATH, instalarlo o usar la ruta de Node configurada en el equipo; no copiar las rutas personales de otra computadora.
-
-Los datos del dominio del sitio publicado no aparecen en localhost: cada origen del navegador tiene su almacenamiento. Mantener el mismo puerto durante las pruebas. Git no sincroniza `localStorage`, IndexedDB ni adjuntos. Usar datos de prueba y no contratos reales en desarrollo.
-
-## Antes de trabajar en cualquiera de los equipos
-
-```powershell
-node scripts/sync.mjs status
-node scripts/sync.mjs pull
-node scripts/serve.mjs
-```
-
-`sync:pull` exige una carpeta limpia y solo permite avance directo. Si no hay red, autenticacion o las ramas divergen, se detiene. No borra, fuerza, mezcla ni guarda cambios por su cuenta.
-
-## Al terminar y antes de cambiar de computadora
+Requiere Node.js 24 o superior. Sin dependencias npm.
 
 ```powershell
 node scripts/check.mjs
-git status
-git diff
-git add dist scripts package.json README.md SECURITY.md AGENTS.md .gitignore .gitattributes
-git commit -m "Describir el cambio realizado"
+node scripts/test-calendar.cjs
+node scripts/test-project-close.cjs
+node scripts/serve.mjs
 ```
 
-Revisar y autorizar el destino y los commits pendientes antes de subir. Solo entonces:
+Abrir http://127.0.0.1:8090/ o http://127.0.0.1:8090/mobile-preview.html para la vista previa móvil. Esta interfaz conserva sus datos en cada navegador; Git no los sincroniza.
+
+## Interfaz conectada al backend
+
+Los archivos dist/connected.html, connected.js y connected.css incluyen login, paneles por perfil, proyectos, tareas, solicitudes, usuarios, costos, actividades de cronograma y PDF con datos del servidor. No abrir connected.html como archivo ni con el servidor estático: necesita que el backend la sirva junto con /api bajo el mismo origen.
+
+Clonar este repositorio en una carpeta llamada frontend y el repositorio de backend en una carpeta hermana llamada backend. Desde backend:
 
 ```powershell
-node scripts/sync.mjs push --confirm-upload
+node server/demo.mjs
 ```
 
-No guardar tokens en archivos o URLs. Usar el inicio de sesion de Git Credential Manager, GitHub CLI o la integracion corporativa aprobada. El parametro de confirmacion no verifica si el remoto sigue siendo privado; comprobarlo en el servicio antes de la primera subida y al cambiar el destino.
+Abrir http://127.0.0.1:8092/. Para otra estructura de carpetas, definir FRONTEND_DIR con la ruta absoluta a esta carpeta dist. El backend genera cuentas y datos ficticios únicamente en su directorio de estado externo a ambos repositorios. Las cuentas se entregan en un archivo local; no están incluidas en Git.
 
-Si la notebook no ve el cambio, comprobar que se confirmo y subio desde la principal, y despues ejecutar `sync:pull` en la notebook.
+La interfaz conectada es una demostración local, no una PWA ni un despliegue de producción. Los adjuntos y los editores avanzados de comparativos, versiones y papelera siguen pendientes. La versión original conserva esas funciones locales separadas.
 
-## Trabajo simultaneo
+## Sincronización
 
-Para una persona alternando equipos, terminar con commit y push antes de abrir el otro. Para trabajo simultaneo, crear ramas distintas (`git switch -c trabajo/nombre`) y revisar una solicitud de cambios antes de integrarlas. Si Git rechaza el push o pull, detenerse y pedir ayuda; no usar force push ni reset destructivo.
-
-Git no transmite archivos sin commit. Si no se puede subir por falta de red, continuar en ese mismo equipo y no editar los mismos archivos en el otro hasta sincronizar.
-
-## Primer enlace con el remoto (solo despues de aprobarlo)
-
-```powershell
-git remote add origin URL_PRIVADA
-node scripts/sync.mjs status
-node scripts/sync.mjs push --confirm-upload
-```
-
-Si `origin` ya existe, revisarlo antes de cambiarlo. No ejecutar `remote add` nuevamente. Estas instrucciones son preparatorias: no acreditan que el repositorio remoto ya exista.
-
-## Historial y hosting
-
-Se conservaron las ocho versiones de la aplicacion, sus fechas y mensajes. Sus identificadores cambiaron porque se excluyo la configuracion propia del proveedor de hosting de todos los commits. El repositorio original no fue modificado. La nueva copia no contiene configuracion de despliegue, datos del negocio, adjuntos ni credenciales.
-
-No ejecutar los helpers de Sites en esta carpeta sin definir previamente el flujo de despliegue. Abrir o modificar la app no publica automaticamente una version.
-
-## Atajos opcionales con npm
-
-Si npm esta instalado, package.json ofrece start, check, sync:status, sync:pull y sync:push como alias de los comandos Node. En este entorno principal se detecto Node, pero no npm; los comandos Node funcionan sin instalar paquetes.
-
+Revisar node scripts/sync.mjs status antes de trabajar y usar pull solo con la carpeta limpia y el remoto privado autorizado. No subir cambios sin autorización del usuario. No usar force push ni reescribir el historial. El repositorio contiene código, nunca datos del navegador, bases, contratos, adjuntos, contraseñas ni accesos de prueba.

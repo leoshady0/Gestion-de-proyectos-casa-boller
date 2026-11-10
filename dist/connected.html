@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#23429C"><title>Gestión de proyectos · Pruebas conectadas</title><link rel="icon" href="forja-icon.svg"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="connected.css"></head>
+<body>
+<section class="login-screen" id="login-screen">
+ <div class="login-story"><img src="forja-icon.svg" width="48" height="60" alt=""><span class="environment">ENTORNO DE PRUEBAS</span><h1>Tu equipo.<br>Todos los proyectos.<br>Un mismo lugar.</h1><p>Coordiná tareas, revisá el avance y gestioná las autorizaciones desde el ordenador o el teléfono.</p><div class="login-trust">Datos ficticios · Espacio separado de tu aplicación actual</div></div>
+ <div class="login-card"><h2>Ingresá a tu espacio</h2><p>Usá una de las cuentas de prueba entregadas para esta demostración.</p>
+ <form id="login-form"><label>Correo<input name="email" type="email" autocomplete="username" required placeholder="usuario@empresa.com"></label><label>Contraseña<input name="password" type="password" autocomplete="current-password" minlength="14" maxlength="128" required></label><button class="primary" type="submit">Iniciar sesión</button><p id="login-error" class="form-error" role="alert"></p></form><p class="login-note">Los permisos se verifican en el servidor. Esta versión no importa los datos de tu navegador.</p></div>
+</section>
+<div id="connected-app" hidden>
+ <aside><a class="brand" href="#"><span class="brand-lockup"><img src="forja-icon.svg" width="35" height="44" alt=""><b>Gestión de proyectos</b></span></a><div class="workspace"><span id="user-name"></span><small id="user-role"></small></div><nav id="desktop-nav" aria-label="Navegación principal"></nav><div class="side-foot"><span class="online"></span> Datos compartidos de prueba<small>Esta sesión usa la base de desarrollo.</small><button data-action="logout">Cerrar sesión</button></div></aside>
+ <main><div class="connected-mobile-identity"><strong>Gestión de proyectos</strong><small id="mobile-identity"></small></div><header><span>Mi espacio <i>/</i> <b id="breadcrumb">Inicio</b></span><div class="header-actions"><span class="environment">PRUEBAS</span><button data-action="refresh">↻ Actualizar</button><button class="mobile-signout" data-action="logout">Salir</button></div></header>
+ <div id="page-error" class="page-error" role="alert" hidden></div><div id="app-loading" role="status" hidden>Actualizando datos…</div><div id="page"></div>
+ <footer>Gestión de proyectos<span>ENTORNO LOCAL DE PRUEBAS</span></footer></main>
+ <nav id="connected-mobile-nav" class="connected-mobile-nav" aria-label="Navegación móvil"></nav>
+</div>
+<dialog id="editor"><form id="editor-form"><div class="sectionhead"><h2 id="editor-title"></h2><button type="button" data-action="close-dialog" aria-label="Cerrar">✕</button></div><div id="editor-fields"></div><p id="editor-error" class="form-error" role="alert"></p><div class="dialogfoot"><button type="button" data-action="close-dialog">Cancelar</button><button class="primary" type="submit" id="editor-submit">Guardar</button></div></form></dialog>
+<div id="connected-toast" role="status"></div>
+<script src="costs-report.js"></script><script src="project-close-report.js"></script><script src="connected.js"></script>
+</body></html>

@@ -1,15 +1,17 @@
 {
-  "name": "forja-development",
-  "version": "0.1.0",
+  "name": "gestion-proyectos-frontend",
+  "version": "0.2.0",
   "private": true,
-  "description": "FORJA - desarrollo local y sincronizacion Git entre equipos",
-  "engines": { "node": ">=22" },
+  "description": "Interfaces de ordenador y smartphone para gestión de proyectos",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "start": "node scripts/serve.mjs",
     "check": "node scripts/check.mjs",
+    "test": "node scripts/test-calendar.cjs && node scripts/test-project-close.cjs",
     "sync:status": "node scripts/sync.mjs status",
     "sync:pull": "node scripts/sync.mjs pull",
     "sync:push": "node scripts/sync.mjs push"
   }
 }
-
