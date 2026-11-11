@@ -16,6 +16,25 @@ function schedulePeriodIncidents(s,index){const days=schedulePeriodDays(s,index)
 function scheduleSnapshot(s){const copy=structuredClone(s);normalizeSchedule(copy);return {start:copy.start,unit:copy.unit,calendarDays:copy.calendarDays,weeks:Math.ceil(copy.calendarDays/7),rows:copy.rows.map(r=>({id:r.id,name:r.name,group:!!r.group,activeDays:[...r.activeDays],active:[...new Set(r.activeDays.map(d=>Math.ceil(d/7)))].sort((a,b)=>a-b)})),incidents:structuredClone(copy.incidents)}}
 function scheduleFingerprint(s){return JSON.stringify(scheduleSnapshot(s))}
 function buildScheduleVersion(project,author,note,now=new Date().toISOString(),id=crypto.randomUUID()){if(!author.trim())throw Error('Escribe el nombre del responsable.');return {id,number:Math.max(0,...(project.scheduleVersions||[]).map(v=>v.number))+1,author:author.trim(),note:note.trim(),savedAt:now,snapshot:scheduleSnapshot(project.schedule)}}
-const ForjaCalendar={normalizeSchedule,scheduleCount,schedulePeriodState,scheduleDuration,schedulePeriodDate,scheduleStep,setSchedulePeriod,resizeSchedule,rangeSchedule,scheduleDayISO,scheduleIncidentDay,schedulePeriodIncidents,scheduleSnapshot,scheduleFingerprint,buildScheduleVersion};
+function scheduleActivityGroups(rows){
+ const membership=new Map();
+ let legacyGroup=null;
+ for(const row of rows){
+  if(row.group)legacyGroup=row.id;
+  else membership.set(row.id,Object.hasOwn(row,'groupId')?row.groupId:legacyGroup);
+ }
+ return membership;
+}
+function scheduleGroupedRows(rows){
+ const groups=new Map(rows.filter(row=>row.group).map(row=>[row.id,[row]]));
+ const membership=scheduleActivityGroups(rows), ungrouped=[];
+ for(const row of rows){
+  if(row.group)continue;
+  const group=groups.get(membership.get(row.id));
+  (group??ungrouped).push(row);
+ }
+ return ungrouped.concat(...groups.values());
+}
+const ForjaCalendar={normalizeSchedule,scheduleCount,schedulePeriodState,scheduleDuration,schedulePeriodDate,scheduleStep,setSchedulePeriod,resizeSchedule,rangeSchedule,scheduleDayISO,scheduleIncidentDay,schedulePeriodIncidents,scheduleSnapshot,scheduleFingerprint,buildScheduleVersion,scheduleActivityGroups,scheduleGroupedRows};
 if(typeof module!=='undefined')module.exports=ForjaCalendar;
 

@@ -1,8 +1,9 @@
 function costTotals(c){
  const sum=xs=>xs.reduce((a,x)=>a+Math.round(Number(x.amount)*100),0)/100;
  const approved=c.quotes.filter(x=>x.approved),base=sum(approved.filter(x=>x.category==='Base')),additionalBudget=sum(approved.filter(x=>x.category==='Adicional'));
+ const budget=c.approvedBudget??Math.round((base+additionalBudget)*100)/100;
  const actual=sum(c.expenses),paid=sum(c.expenses.filter(x=>x.status==='Pagado')),additional=sum(c.expenses.filter(x=>x.category==='Adicional'));
- return {base,additionalBudget,budget:Math.round((base+additionalBudget)*100)/100,actual,paid,pending:Math.round((actual-paid)*100)/100||0,additional,variance:Math.round((actual-base-additionalBudget)*100)/100||0};
+ return {base,additionalBudget,budget,actual,paid,pending:Math.round((actual-paid)*100)/100||0,additional,variance:Math.round((actual-budget)*100)/100||0};
 }
 function costMoney(n,currency){return new Intl.NumberFormat('es',{style:'currency',currency,maximumFractionDigits:2}).format(n)}
 function costsPDF(project,c,files=[]){
@@ -10,8 +11,8 @@ function costsPDF(project,c,files=[]){
  const add=(text,bold=false)=>blocks.push({text,bold});
  add('CIERRE DE COSTOS DEL PROYECTO',true);add(project.name,true);add('Fecha del informe: '+new Date().toLocaleDateString('es')+' | Moneda: '+c.currency);add('');
  add('RESUMEN ECONOMICO',true);
- for(const [label,n] of [['Presupuesto base aprobado',totals.base],['Adicionales presupuestados aprobados',totals.additionalBudget],['Presupuesto total aprobado',totals.budget],['Gasto total incurrido',totals.actual],['De los cuales son gastos adicionales',totals.additional],['Pagado',totals.paid],['Pendiente de pago',totals.pending],['Diferencia (gasto - presupuesto)',totals.variance]])add(label+': '+money(n));
- add('');add('CONCLUSION',true);add(totals.budget===0?'No hay presupuesto aprobado registrado para evaluar la desviacion.':totals.variance>0?'El gasto supera el presupuesto aprobado en '+money(totals.variance)+'.':'El gasto queda por debajo del presupuesto aprobado en '+money(-totals.variance)+'.');
+ for(const [label,n] of [...(c.approvedBudget===undefined?[['Presupuesto base aprobado',totals.base],['Adicionales presupuestados aprobados',totals.additionalBudget]]:[]),['Presupuesto total aprobado',totals.budget],['Gasto total incurrido',totals.actual],['De los cuales son gastos adicionales',totals.additional],['Pagado',totals.paid],['Pendiente de pago',totals.pending],['Diferencia (gasto - presupuesto)',totals.variance]])add(label+': '+money(n));
+ add('');add('CONCLUSION',true);add(totals.budget===0&&c.approvedBudget===undefined?'No hay presupuesto aprobado registrado para evaluar la desviacion.':totals.variance===0?'El gasto coincide con el presupuesto aprobado.':totals.variance>0?'El gasto supera el presupuesto aprobado en '+money(totals.variance)+'.':'El gasto queda por debajo del presupuesto aprobado en '+money(-totals.variance)+'.');
  add('El total incurrido incluye gastos pagados y pendientes. Las cotizaciones no aprobadas no integran el presupuesto ni se cuentan como gastos. Importes finales con impuestos incluidos, segun los registros ingresados.');
  if(c.conclusion){add('Observaciones del cierre:',true);add(c.conclusion)}
  add('');add('GASTOS INCURRIDOS',true);

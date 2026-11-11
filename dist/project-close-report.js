@@ -17,8 +17,13 @@ function projectClosePDF(project,tasks,documents=[],files=[],now=new Date(),warn
  if(project.schedule){const s=project.schedule;add('Inicio previsto: '+(s.start||'Sin fecha')+' | Periodo planificado: '+(s.calendarDays||s.weeks*7||0)+' dias');
   for(const row of s.rows||[]){add((row.group?'Grupo: ':'Actividad: ')+(row.name||'Sin nombre'),!!row.group);if(!row.group)add('Dias programados: '+(Array.isArray(row.activeDays)?row.activeDays.length:(row.active||[]).length*7))}
   const incidents=s.incidents||[];add('Incidencias registradas: '+incidents.length);
-  const types={rain:'Lluvia',delay:'Retraso',change:'Cambio de obra',note:'Comentario'};
-  incidents.forEach(x=>{add((x.date||'Sin fecha')+' | '+(types[x.type]||x.type||'Comentario')+' | '+(x.author||'Sin responsable'));add(x.text||'Sin detalle')});
+  const types={rain:'Lluvia',delay:'Atraso',incident:'Incidencia',change:'Cambio de obra',note:'Comentario'};
+  incidents.forEach(x=>{
+   const activity=x.activityId&&(s.rows||[]).find(row=>row.id===x.activityId);
+   add((x.date||'Sin fecha')+' | '+(types[x.type]||x.type||'Comentario')+' | '+(x.author||'Sin responsable'));
+   if(activity)add('Actividad: '+activity.name);
+   add(x.text||'Sin detalle');
+  });
  }else add('Sin cronograma registrado.');
  const versions=project.scheduleVersions||[];add('Versiones guardadas del cronograma: '+versions.length);
  versions.forEach(v=>add('Version '+v.number+' | '+(v.author||'Sin responsable')+' | '+when(v.savedAt)+(v.note?' | '+v.note:'')));
@@ -26,7 +31,7 @@ function projectClosePDF(project,tasks,documents=[],files=[],now=new Date(),warn
  if(project.costs){const c=project.costs,totals=(typeof costTotals==='function'?costTotals:require('./costs-report.js').costTotals)(c);
   const money=n=>new Intl.NumberFormat('es',{style:'currency',currency:c.currency}).format(n);
   add('Moneda: '+c.currency);
-  for(const [label,value] of [['Presupuesto base aprobado',totals.base],['Adicionales aprobados',totals.additionalBudget],['Presupuesto total aprobado',totals.budget],['Gasto incurrido',totals.actual],['Pagado',totals.paid],['Pendiente de pago',totals.pending],['Diferencia: gasto menos presupuesto',totals.variance]])add(label+': '+money(value));
+  for(const [label,value] of [...(c.approvedBudget===undefined?[['Presupuesto base aprobado',totals.base],['Adicionales aprobados',totals.additionalBudget]]:[]),['Presupuesto total aprobado',totals.budget],['Gasto incurrido',totals.actual],['Pagado',totals.paid],['Pendiente de pago',totals.pending],['Diferencia: gasto menos presupuesto',totals.variance]])add(label+': '+money(value));
   add(totals.pending>0?'ATENCION: existen pagos pendientes. Completar tareas no equivale a liquidar los pagos.':'No se registran pagos pendientes.');
   if(!totals.budget)add('No hay presupuesto aprobado registrado para evaluar la desviacion.');
   add('Gastos registrados',true);if(!c.expenses.length)add('Sin gastos registrados.');

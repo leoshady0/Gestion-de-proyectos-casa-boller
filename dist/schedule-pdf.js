@@ -9,9 +9,20 @@ function schedulePDF(project, schedule, version=null) {
   const escape=s=>String(s).normalize('NFC').replace(/[^\x20-\xFF]/g,'?').replace(/[()\\]/g,'\\$&').replace(/[\x80-\xFF]/g,c=>'\\'+c.charCodeAt(0).toString(8).padStart(3,'0'));
   const wrap=(s,n)=>{const lines=[];let line='';for(const word of String(s).split(/\s+/)){if(line.length+word.length+1>n&&line){lines.push(line);line=''}if(word.length>n){if(line){lines.push(line);line=''}for(let i=0;i<word.length;i+=n)lines.push(word.slice(i,i+n))}else line+=(line?' ':'')+word}if(line)lines.push(line);return lines.length?lines:['']};
   const chunks=[[]];let usedHeight=0;
-  for(const row of schedule.rows){const h=Math.max(17,wrap(row.name,43).length*9+6);if(usedHeight+h>390||chunks.at(-1).length>=22){chunks.push([]);usedHeight=0}chunks.at(-1).push(row);usedHeight+=h}
-  const eventLabels={rain:'Lluvia',delay:'Retraso',change:'Cambio de obra',note:'Comentario'},eventColors={rain:'1 0.94 0.68',delay:'1 0.83 0.74',change:'0.89 0.83 1',note:'0.86 0.92 0.99'};
-  const noteLines=[];for(const event of schedule.incidents.slice().sort((a,b)=>a.date.localeCompare(b.date))){const day=calendar.scheduleIncidentDay(schedule,event);for(const line of wrap(`${event.date} | ${eventLabels[event.type]||'Comentario'} | ${day>=1&&day<=schedule.calendarDays?'Dia '+day:'Fuera del plazo actual'}`,90))noteLines.push({text:line,bold:true});for(const line of wrap(event.text,90))noteLines.push({text:line});for(const line of wrap(`Registrado por ${event.author} | ${new Date(event.createdAt).toLocaleString('es')}`,90))noteLines.push({text:line});noteLines.push({text:''})}
+  for(const row of calendar.scheduleGroupedRows(schedule.rows)){const h=Math.max(17,wrap(row.name,43).length*9+6);if(usedHeight+h>390||chunks.at(-1).length>=22){chunks.push([]);usedHeight=0}chunks.at(-1).push(row);usedHeight+=h}
+  const eventLabels={rain:'Lluvia',delay:'Atraso',incident:'Incidencia',change:'Cambio de obra',note:'Comentario'},eventColors={rain:'1 0.94 0.68',delay:'1 0.83 0.74',incident:'1 0.83 0.74',change:'0.89 0.83 1',note:'0.86 0.92 0.99'};
+  const noteLines=[];
+  for(const event of schedule.incidents.slice().sort((a,b)=>a.date.localeCompare(b.date))){
+   const day=calendar.scheduleIncidentDay(schedule,event);
+   const activity=event.activityId&&schedule.rows.find(row=>row.id===event.activityId);
+   const location=day>=1&&day<=schedule.calendarDays?'Dia '+day:'Fuera del plazo actual';
+   for(const line of wrap(`${event.date} | ${eventLabels[event.type]||'Comentario'} | ${location}${activity?' | '+activity.name:''}`,90))noteLines.push({text:line,bold:true});
+   for(const line of wrap(event.text,90))noteLines.push({text:line});
+   const timestamp=event.createdAt?' | '+new Date(event.createdAt).toLocaleString('es'):'';
+   for(const line of wrap(`Registrado por ${event.author}${timestamp}`,90))noteLines.push({text:line});
+   noteLines.push({text:''});
+  }
+  const statusColors={todo:'0.68 0.73 0.80',doing:'0.38 0.59 0.91',done:'0.37 0.75 0.54',delayed:'0.88 0.45 0.49'};
   const notePages=Math.ceil(noteLines.length/34);
   const kids=[],bands=Math.ceil(periods/20),rowChunks=chunks.length,total=bands*rowChunks+notePages;
   let pageNo=0;
@@ -22,15 +33,21 @@ function schedulePDF(project, schedule, version=null) {
     text(28,30,'CRONOGRAMA DE OBRA',16,true);wrap(project.name,80).slice(0,2).forEach((l,i)=>text(28,49+i*12,l,11,true));
     text(28,70,version?`VERSION V${version.number} | ${version.author} | ${new Date(version.savedAt).toLocaleString('es')}`:`BORRADOR | ${project.scheduleDraftInfo?.author||'Autor sin identificar'}${project.scheduleDraftInfo?.savedAt?' | '+new Date(project.scheduleDraftInfo.savedAt).toLocaleString('es'):''}`,7);
     text(28,80,`Inicio: ${schedule.start||'Sin fecha'}  |  ${daily?'Dias':'Semanas'} ${first}-${first+count-1} de ${periods} | Dias calendario`,9);
-    text(28,96,'Cian: programado. Cian claro: semana parcial. Duracion: dias programados (s = semanas, d = dias).',8);
+    text(28,96,'Cian: programado; gris: por iniciar; azul: en curso; verde: completada; rojo: atrasada. * Periodo parcial.',8);
     rect(28,109,205,25,'0.90 0.94 0.99');rect(233,109,43,25,'0.90 0.94 0.99');text(33,125,'ACTIVIDAD',8,true);text(236,125,'DUR.',8,true);
     for(let w=0;w<count;w++){const events=calendar.schedulePeriodIncidents(schedule,first+w),type=events.length===1?events[0].type:events.length?'change':null;rect(276+w*cw,109,cw,25,type?eventColors[type]:'0.90 0.94 0.99');text(279+w*cw,119,prefix+(first+w)+(events.length?'*':''),8,true);text(279+w*cw,129,calendar.schedulePeriodDate(schedule,first+w),6)}
     let y=134;
     for(const row of rows){const lines=wrap(row.name,43),h=Math.max(17,lines.length*9+6);rect(28,y,205,h,row.group?'0.88 0.92 0.98':null);rect(233,y,43,h,row.group?'0.88 0.92 0.98':null);lines.forEach((l,i)=>text(32,y+11+i*9,l,8,!!row.group));if(!row.group)text(237,y+11,calendar.scheduleDuration(schedule,row,true),7);
-      for(let w=0;w<count;w++){const state=calendar.schedulePeriodState(schedule,row,first+w);rect(276+w*cw,y,cw,h,row.group?'0.88 0.92 0.98':state.partial?'0.65 0.89 0.91':state.marked?'0 0.718 0.741':null)}y+=h;
+      for(let w=0;w<count;w++){
+       const state=calendar.schedulePeriodState(schedule,row,first+w),x=276+w*cw;
+       const color=row.group?'0.88 0.92 0.98':state.marked?(statusColors[row.status]||'0 0.718 0.741'):null;
+       rect(x,y,cw,h,color);
+       if(!row.group&&state.partial)text(x+4,y+11,'*',8,true);
+      }
+      y+=h;
     }
     if(!rows.length)text(33,155,'Sin actividades. Agrega filas desde la app.',10);
-    text(28,548,'* Incidencias: amarillo = lluvia; naranja = retraso; violeta = cambio / varias; azul = comentario. Detalle en anexo.',7);
+    text(28,548,'* En el encabezado: incidencias. Amarillo: lluvia; naranja: atraso/incidencia; violeta: cambio/varias; azul: nota.',7);
     text(28,565,'Gestión de proyectos | '+new Date().toLocaleDateString('es'),8);text(694,565,`Pagina ${pageNo} de ${total}`,8);
     const stream=add(`<< /Length ${ops.length} >>\nstream\n${ops}endstream`);
     kids.push(add(`<< /Type /Page /Parent ${pages} 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F ${normal} 0 R /B ${bold} 0 R >> >> /Contents ${stream} 0 R >>`));

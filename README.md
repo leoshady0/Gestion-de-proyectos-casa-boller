@@ -27,7 +27,7 @@ node server/demo.mjs
 
 Abrir http://127.0.0.1:8092/. Para otra estructura de carpetas, definir FRONTEND_DIR con la ruta absoluta a esta carpeta dist. El backend genera cuentas y datos ficticios únicamente en su directorio de estado externo a ambos repositorios. Las cuentas se entregan en un archivo local; no están incluidas en Git.
 
-La interfaz conectada es una demostración local, no una PWA ni un despliegue de producción. Los adjuntos y los editores avanzados de comparativos, versiones y papelera siguen pendientes. La versión original conserva esas funciones locales separadas.
+La vista previa móvil conectada se abre en http://127.0.0.1:8092/mobile-preview. Las tareas del tablero se ordenan por estado. El cronograma Gantt se puede editar, agrupar por rubros y consultar en días, semanas o meses. El guardado es manual y registra el historial. Se puede exportar el PDF de cualquiera de las últimas 15 versiones. En Costos, los administradores pueden editar el presupuesto aprobado y los administradores y responsables pueden adjuntar PDF o Excel a cada gasto. La interfaz conectada es una demostración local.
 
 ## Sincronización
 
